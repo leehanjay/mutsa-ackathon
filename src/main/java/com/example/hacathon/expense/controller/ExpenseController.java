@@ -6,9 +6,9 @@ import com.example.hacathon.expense.dto.ExpenseResponseDto;
 import com.example.hacathon.expense.service.ExpenseService;
 import com.example.hacathon.global.apiPayload.ApiResponse;
 import com.example.hacathon.global.apiPayload.code.GeneralSuccessCode;
-import com.example.hacathon.global.auth.JwtUserPrincipal; // 💡 임포트 추가 확인
+import com.example.hacathon.global.auth.JwtUserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 임포트 추가 확인
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
