@@ -1,5 +1,6 @@
 package com.example.hacathon.expense.service;
 
+import com.example.hacathon.expense.dto.ExpenseListResponseDto;
 import com.example.hacathon.expense.dto.ExpenseRequestDto;
 import com.example.hacathon.expense.dto.ExpenseResponseDto;
 import com.example.hacathon.expense.entity.Expense;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +27,8 @@ public class ExpenseService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-        LocalDate today = LocalDate.now(); // 프론트 요청대로 서버에서 날짜 채번
+        LocalDate today = LocalDate.now();
 
-        // 1. 소비 내역 저장 (merchant를 기존 category에 매핑, 빈 메모 전달)
         Expense expense = Expense.createNew(
                 member,
                 request.getMerchant(),
@@ -36,7 +38,6 @@ public class ExpenseService {
         );
         Expense savedExpense = expenseRepository.save(expense);
 
-        // 2. 이번 달 누적 지출액(spentAmount) 계산 (월급일 기준)
         int currentDay = today.getDayOfMonth();
         int payDay = member.getPayDay() != null ? member.getPayDay() : 1;
         LocalDate startDate;
@@ -49,13 +50,64 @@ public class ExpenseService {
 
         Integer totalSpent = expenseRepository.sumAmountByMemberIdAndDateRange(member.getId(), startDate, today);
 
-        // 3. 프론트엔드가 요구한 스펙에 맞춰 응답 DTO 조립
         return ExpenseResponseDto.builder()
-                .id("exp-" + savedExpense.getId()) // "exp-123" 형태로 가공
+                .id("exp-" + savedExpense.getId())
                 .merchant(savedExpense.getCategory())
                 .amount(savedExpense.getAmount())
                 .date(savedExpense.getExpenseDate())
                 .spentAmount(totalSpent)
                 .build();
+    }
+
+    //  추가됨: 1번(총지출) + 2번(소비 리스트) 조회 로직
+    @Transactional(readOnly = true)
+    public ExpenseListResponseDto getExpenseList(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        LocalDate today = LocalDate.now();
+        int currentDay = today.getDayOfMonth();
+        int payDay = member.getPayDay() != null ? member.getPayDay() : 1;
+        LocalDate startDate;
+
+        if (payDay > currentDay) {
+            startDate = today.minusMonths(1).withDayOfMonth(payDay);
+        } else {
+            startDate = today.withDayOfMonth(payDay);
+        }
+
+        // 총 지출액 계산
+        Integer totalSpent = expenseRepository.sumAmountByMemberIdAndDateRange(member.getId(), startDate, today);
+
+        // 기간 내 소비 리스트 조회
+        List<Expense> expenseList = expenseRepository.findAllByMemberIdAndExpenseDateBetweenOrderByExpenseDateDescIdDesc(member.getId(), startDate, today);
+
+        List<ExpenseListResponseDto.ExpenseItemDto> itemDtos = expenseList.stream()
+                .map(e -> ExpenseListResponseDto.ExpenseItemDto.builder()
+                        .id(e.getId())
+                        .merchant(e.getCategory())
+                        .amount(e.getAmount())
+                        .date(e.getExpenseDate())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ExpenseListResponseDto.builder()
+                .totalSpentAmount(totalSpent)
+                .expenses(itemDtos)
+                .build();
+    }
+
+    // 추가됨: 3번(소비 내역 삭제) 로직
+    @Transactional
+    public void deleteExpense(Long memberId, Long expenseId) {
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지출 내역을 찾을 수 없습니다."));
+
+        // 본인 내역이 맞는지 확인 (보안)
+        if (!expense.getMember().getId().equals(memberId)) {
+            throw new IllegalArgumentException("권한이 없는 회원입니다.");
+        }
+
+        expenseRepository.delete(expense);
     }
 }

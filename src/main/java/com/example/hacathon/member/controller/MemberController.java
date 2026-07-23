@@ -2,9 +2,11 @@ package com.example.hacathon.member.controller;
 
 import com.example.hacathon.global.apiPayload.ApiResponse;
 import com.example.hacathon.global.apiPayload.code.GeneralSuccessCode;
+import com.example.hacathon.global.auth.JwtUserPrincipal;
 import com.example.hacathon.member.dto.request.UpdateBudgetRequestDto;
 import com.example.hacathon.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +17,11 @@ public class MemberController {
     private final MemberService memberService;
 
     @PatchMapping("/budget")
-    public ApiResponse<String> updateBudget(@RequestBody UpdateBudgetRequestDto request) {
-        // TODO: JWT 필터 연동 후 @AuthenticationPrincipal 등으로 교체
-        Long memberId = 1L;
+    public ApiResponse<String> updateBudget(
+            @AuthenticationPrincipal JwtUserPrincipal principal,
+            @RequestBody UpdateBudgetRequestDto request
+    ) {
+        Long memberId = principal.getUserId();
 
         memberService.updateBudget(memberId, request);
 
