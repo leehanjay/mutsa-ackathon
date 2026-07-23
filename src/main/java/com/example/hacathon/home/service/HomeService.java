@@ -1,6 +1,8 @@
 package com.example.hacathon.home.service;
 
 import com.example.hacathon.expense.repository.ExpenseRepository;
+import com.example.hacathon.global.apiPayload.code.GeneralErrorCode;
+import com.example.hacathon.global.apiPayload.exception.ProjectException;
 import com.example.hacathon.home.dto.HomeResponseDto;
 import com.example.hacathon.member.entity.Member;
 import com.example.hacathon.member.repository.MemberRepository;
@@ -24,7 +26,7 @@ public class HomeService {
 
     public HomeResponseDto getHomeData(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new ProjectException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
         LocalDate today = LocalDate.now();
         int currentDay = today.getDayOfMonth();

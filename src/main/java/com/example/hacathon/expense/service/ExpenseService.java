@@ -5,6 +5,8 @@ import com.example.hacathon.expense.dto.ExpenseRequestDto;
 import com.example.hacathon.expense.dto.ExpenseResponseDto;
 import com.example.hacathon.expense.entity.Expense;
 import com.example.hacathon.expense.repository.ExpenseRepository;
+import com.example.hacathon.global.apiPayload.code.GeneralErrorCode;
+import com.example.hacathon.global.apiPayload.exception.ProjectException;
 import com.example.hacathon.member.entity.Member;
 import com.example.hacathon.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,7 @@ public class ExpenseService {
     @Transactional
     public ExpenseResponseDto createExpense(Long memberId, ExpenseRequestDto request) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProjectException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
         LocalDate today = LocalDate.now();
 
@@ -59,11 +61,10 @@ public class ExpenseService {
                 .build();
     }
 
-    //  추가됨: 1번(총지출) + 2번(소비 리스트) 조회 로직
     @Transactional(readOnly = true)
     public ExpenseListResponseDto getExpenseList(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProjectException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
         LocalDate today = LocalDate.now();
         int currentDay = today.getDayOfMonth();
@@ -97,15 +98,14 @@ public class ExpenseService {
                 .build();
     }
 
-    // 추가됨: 3번(소비 내역 삭제) 로직
     @Transactional
     public void deleteExpense(Long memberId, Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 지출 내역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProjectException(GeneralErrorCode._BAD_REQUEST));
 
         // 본인 내역이 맞는지 확인 (보안)
         if (!expense.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("권한이 없는 회원입니다.");
+            throw new ProjectException(GeneralErrorCode._FORBIDDEN);
         }
 
         expenseRepository.delete(expense);
