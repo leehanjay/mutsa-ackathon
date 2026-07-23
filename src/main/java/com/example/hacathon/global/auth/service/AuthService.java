@@ -2,8 +2,11 @@ package com.example.hacathon.global.auth.service;
 
 import com.example.hacathon.global.auth.JwtTokenProvider;
 import com.example.hacathon.member.dto.request.LoginRequestDto;
+import com.example.hacathon.member.dto.request.SignupRequestDto;
 import com.example.hacathon.member.dto.response.LoginResponseDto;
+import com.example.hacathon.member.dto.response.SignupResponseDto;
 import com.example.hacathon.member.entity.Member;
+import com.example.hacathon.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,5 +41,28 @@ public class AuthService {
 
         // 5. 응답 반환 (유효기간: 36000초 = 10시간)
         return LoginResponseDto.of(accessToken, 36000L);
+    }
+    @Transactional
+    public SignupResponseDto signup(SignupRequestDto request) {
+        // 1. 이메일 중복 체크
+        if (memberRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+
+        // 2. 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        // 3. Member 엔티티 생성 (정적 팩토리 메서드 활용)
+        Member member = Member.createGeneral(
+                request.getEmail(),
+                encodedPassword,
+                request.getNickname()
+        );
+
+        // 4. DB 저장
+        Member savedMember = memberRepository.save(member);
+
+        // 5. 응답 DTO 반환
+        return SignupResponseDto.from(savedMember);
     }
 }
