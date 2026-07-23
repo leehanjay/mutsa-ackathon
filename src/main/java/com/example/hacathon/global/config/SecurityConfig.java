@@ -108,13 +108,7 @@ public class SecurityConfig {
                 )
         );
 
-        configuration.setAllowedHeaders(
-                List.of(
-                        HttpHeaders.AUTHORIZATION,
-                        HttpHeaders.CONTENT_TYPE,
-                        HttpHeaders.ACCEPT
-                )
-        );
+        configuration.setAllowedHeaders(List.of("*"));
 
         configuration.setExposedHeaders(
                 List.of(HttpHeaders.AUTHORIZATION)
