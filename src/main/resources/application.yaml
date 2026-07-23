@@ -1,3 +1,29 @@
 spring:
   application:
     name: hacathon
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/hacathon?characterEncoding=UTF-8&serverTimezone=Asia/Seoul}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    # 기본값을 제거하여 외부 노출을 완벽히 차단했습니다.
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+    defer-datasource-initialization: false
+
+  sql:
+    init:
+      mode: never
+
+jwt:
+  # JWT 시크릿 키도 환경 변수로 분리했습니다.
+  secret: ${JWT_SECRET}
+  expiration: 3600000
