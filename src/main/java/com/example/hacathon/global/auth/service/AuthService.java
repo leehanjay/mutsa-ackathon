@@ -1,5 +1,7 @@
 package com.example.hacathon.global.auth.service;
 
+import com.example.hacathon.global.apiPayload.code.GeneralErrorCode;
+import com.example.hacathon.global.apiPayload.exception.ProjectException;
 import com.example.hacathon.global.auth.JwtTokenProvider;
 import com.example.hacathon.member.dto.request.LoginRequestDto;
 import com.example.hacathon.member.dto.request.SignupRequestDto;
@@ -21,48 +23,37 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginResponseDto login(LoginRequestDto request) {
-        // 1. 이메일 존재 여부 확인
-        Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-
-        // 2. 소셜 로그인 회원 체크 (비밀번호가 null인 경우)
-        if (member.getPassword() == null) {
-            throw new IllegalArgumentException("소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해주세요.");
-        }
-
-        // 3. 비밀번호 일치 여부 검증
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        // 4. JWT 토큰 생성
-        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getEmail());
-
-        // 5. 응답 반환 (유효기간: 36000초 = 10시간)
-        return LoginResponseDto.of(accessToken, 36000L);
-    }
     @Transactional
     public SignupResponseDto signup(SignupRequestDto request) {
-        // 1. 이메일 중복 체크
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new ProjectException(GeneralErrorCode.DUPLICATE_EMAIL);
         }
 
-        // 2. 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        // 3. Member 엔티티 생성 (정적 팩토리 메서드 활용)
         Member member = Member.createGeneral(
                 request.getEmail(),
                 encodedPassword,
                 request.getNickname()
         );
 
-        // 4. DB 저장
         Member savedMember = memberRepository.save(member);
-
-        // 5. 응답 DTO 반환
         return SignupResponseDto.from(savedMember);
+    }
+
+    public LoginResponseDto login(LoginRequestDto request) {
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ProjectException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getPassword() == null) {
+            throw new ProjectException(GeneralErrorCode.SOCIAL_MEMBER_CANNOT_LOGIN);
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new ProjectException(GeneralErrorCode.INVALID_PASSWORD);
+        }
+
+        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getEmail());
+        return LoginResponseDto.of(accessToken, 36000L);
     }
 }
