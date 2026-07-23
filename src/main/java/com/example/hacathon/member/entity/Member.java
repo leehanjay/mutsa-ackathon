@@ -88,4 +88,8 @@ public class Member extends BaseTimeEntity {
         this.monthlyBudget = monthlyBudget;
         this.characterType = characterType;
     }
+    public void updateBudgetInfo(Integer payDay, Integer monthlyBudget) {
+        this.payDay = payDay;
+        this.monthlyBudget = monthlyBudget;
+    }
 }
