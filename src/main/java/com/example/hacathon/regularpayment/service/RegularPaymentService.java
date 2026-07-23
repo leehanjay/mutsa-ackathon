@@ -21,7 +21,6 @@ public class RegularPaymentService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-
         RegularPayment payment = RegularPayment.createNew(
                 member,
                 request.getPaymentName(),
