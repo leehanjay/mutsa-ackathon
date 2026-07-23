@@ -1,6 +1,7 @@
 package com.example.hacathon.regularpayment.controller;
 
 import com.example.hacathon.global.apiPayload.ApiResponse;
+import com.example.hacathon.global.apiPayload.code.GeneralSuccessCode;
 import com.example.hacathon.regularpayment.dto.SubscriptionRequestDto;
 import com.example.hacathon.regularpayment.service.RegularPaymentService;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +16,19 @@ public class RegularPaymentController {
 
     @PostMapping
     public ApiResponse<Long> createSubscription(@RequestBody SubscriptionRequestDto request) {
-        Long memberId = 1L; // 하드코딩
+        // TODO: JWT 필터 연동 후 교체
+        Long memberId = 1L;
         Long paymentId = service.createSubscription(memberId, request);
-        return ApiResponse.success(200, "정기결제 등록 성공", paymentId);
+
+        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_CREATED 사용)
+        return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, paymentId);
     }
 
     @PatchMapping("/{paymentId}/toggle")
     public ApiResponse<Boolean> toggleSubscription(@PathVariable Long paymentId) {
         Boolean currentStatus = service.toggleSubscription(paymentId);
-        return ApiResponse.success(200, "정기결제 활성화 상태 변경 성공", currentStatus);
+
+        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_OK 사용)
+        return ApiResponse.onSuccess(GeneralSuccessCode._OK, currentStatus);
     }
 }

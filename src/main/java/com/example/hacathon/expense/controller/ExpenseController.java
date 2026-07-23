@@ -3,6 +3,7 @@ package com.example.hacathon.expense.controller;
 import com.example.hacathon.expense.dto.ExpenseRequestDto;
 import com.example.hacathon.expense.service.ExpenseService;
 import com.example.hacathon.global.apiPayload.ApiResponse;
+import com.example.hacathon.global.apiPayload.code.GeneralSuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +16,11 @@ public class ExpenseController {
 
     @PostMapping
     public ApiResponse<Long> createExpense(@RequestBody ExpenseRequestDto request) {
-        Long memberId = 1L; // JWT 적용 전까지 1번 유저 하드코딩
+        // TODO: 팀원이 JWT 필터(Filter) 및 인가(Auth) 로직을 추가하면 1L을 @AuthenticationPrincipal 등으로 교체!
+        Long memberId = 1L;
         Long expenseId = expenseService.createExpense(memberId, request);
-        return ApiResponse.success(200, "지출 내역 등록 성공", expenseId);
+
+        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_CREATED 사용)
+        return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, expenseId);
     }
 }
