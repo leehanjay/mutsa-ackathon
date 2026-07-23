@@ -34,7 +34,7 @@ public class HomeService {
         if (member.getPayDay() == null ||
                 member.getMonthlyBudget() == null) {
             throw new ProjectException(
-                    GeneralErrorCode._BAD_REQUEST
+                    GeneralErrorCode.PLAN_NOT_SET
             );
         }
 
