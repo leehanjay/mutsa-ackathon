@@ -18,7 +18,7 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-        // 💡 엔티티에 만들어둔 메서드를 호출하여 더티 체킹(Dirty Checking)으로 안전하게 DB 업데이트!
+
         member.updateBudgetInfo(request.getPayDay(), request.getMonthlyBudget());
     }
 }
