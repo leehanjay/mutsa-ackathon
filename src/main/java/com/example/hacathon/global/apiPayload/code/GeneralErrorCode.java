@@ -17,7 +17,7 @@ public enum GeneralErrorCode implements BaseErrorCode{
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "AUTH400_1", "이미 가입된 이메일입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "AUTH400_2", "비밀번호가 일치하지 않습니다."),
     SOCIAL_MEMBER_CANNOT_LOGIN(HttpStatus.BAD_REQUEST, "AUTH400_3", "소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해주세요."),
-    PLAN_NOT_SET(HttpStatus.BAD_REQUEST, "MEMBER400_1", "예산과 월급일 설정이 필요합니다.");
+    PLAN_NOT_SET(HttpStatus.BAD_REQUEST, "PLAN400", "예산과 월급일 설정이 필요합니다.");
 
 
     private final HttpStatus status;
