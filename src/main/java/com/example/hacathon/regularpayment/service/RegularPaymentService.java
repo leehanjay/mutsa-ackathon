@@ -21,7 +21,6 @@ public class RegularPaymentService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-        // 💡 수정됨: C님이 엔티티에 만들어두신 강력한 예외처리 메서드(createNew)를 사용합니다!
         RegularPayment payment = RegularPayment.createNew(
                 member,
                 request.getPaymentName(),

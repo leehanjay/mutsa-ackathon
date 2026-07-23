@@ -32,4 +32,23 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public JwtUserPrincipal getPrincipal(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Long userId = claims.get("userId", Long.class);
+        String email = claims.getSubject();
+
+        return JwtUserPrincipal.builder()
+                .userId(userId)
+                .email(email)
+                .build();
+    }
 }
