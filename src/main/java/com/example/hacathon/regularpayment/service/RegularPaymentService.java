@@ -36,7 +36,7 @@ public class RegularPaymentService {
         RegularPayment payment = repository.findById(paymentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 구독 내역을 찾을 수 없습니다."));
 
-        // 💡 주의: RegularPayment 엔티티 클래스 안에 아래 메서드를 직접 추가해 주셔야 합니다!
+
         // public void toggleActive() { this.isActive = !this.isActive; }
         payment.toggleActive();
 

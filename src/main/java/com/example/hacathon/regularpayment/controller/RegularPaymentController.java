@@ -20,7 +20,7 @@ public class RegularPaymentController {
         Long memberId = 1L;
         Long paymentId = service.createSubscription(memberId, request);
 
-        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_CREATED 사용)
+
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, paymentId);
     }
 
@@ -28,7 +28,7 @@ public class RegularPaymentController {
     public ApiResponse<Boolean> toggleSubscription(@PathVariable Long paymentId) {
         Boolean currentStatus = service.toggleSubscription(paymentId);
 
-        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_OK 사용)
+
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, currentStatus);
     }
 }
