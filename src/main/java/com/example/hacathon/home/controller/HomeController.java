@@ -22,7 +22,7 @@ public class HomeController {
         Long memberId = 1L;
         HomeResponseDto response = homeService.getHomeData(memberId);
 
-        // 💡 수정됨: 팀원의 새로운 ApiResponse 포맷 적용 (_OK 사용)
+
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, response);
     }
 }
