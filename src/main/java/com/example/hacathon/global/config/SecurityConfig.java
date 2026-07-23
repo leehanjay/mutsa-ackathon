@@ -96,9 +96,18 @@ public class SecurityConfig {
                 .toList();
 
         configuration.setAllowedOrigins(origins);
+
         configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
+
         configuration.setAllowedHeaders(
                 List.of(
                         HttpHeaders.AUTHORIZATION,
@@ -106,11 +115,12 @@ public class SecurityConfig {
                         HttpHeaders.ACCEPT
                 )
         );
+
         configuration.setExposedHeaders(
                 List.of(HttpHeaders.AUTHORIZATION)
         );
 
-        // Authorization: Bearer 방식이므로 false
+        // JWT를 Authorization 헤더에 넣는 방식이라 false로 충분함
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 
