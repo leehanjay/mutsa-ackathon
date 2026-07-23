@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-
 public class AuthService {
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -29,7 +29,8 @@ public class AuthService {
             throw new ProjectException(GeneralErrorCode.DUPLICATE_EMAIL);
         }
 
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String encodedPassword =
+                passwordEncoder.encode(request.getPassword());
 
         Member member = Member.createGeneral(
                 request.getEmail(),
@@ -38,22 +39,41 @@ public class AuthService {
         );
 
         Member savedMember = memberRepository.save(member);
+
         return SignupResponseDto.from(savedMember);
     }
 
     public LoginResponseDto login(LoginRequestDto request) {
         Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ProjectException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() ->
+                        new ProjectException(
+                                GeneralErrorCode.MEMBER_NOT_FOUND
+                        )
+                );
 
         if (member.getPassword() == null) {
-            throw new ProjectException(GeneralErrorCode.SOCIAL_MEMBER_CANNOT_LOGIN);
+            throw new ProjectException(
+                    GeneralErrorCode.SOCIAL_MEMBER_CANNOT_LOGIN
+            );
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new ProjectException(GeneralErrorCode.INVALID_PASSWORD);
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                member.getPassword()
+        )) {
+            throw new ProjectException(
+                    GeneralErrorCode.INVALID_PASSWORD
+            );
         }
 
-        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getEmail());
-        return LoginResponseDto.of(accessToken, 36000L);
+        String accessToken = jwtTokenProvider.createToken(
+                member.getId(),
+                member.getEmail()
+        );
+
+        return LoginResponseDto.of(
+                accessToken,
+                jwtTokenProvider.getExpirationSeconds()
+        );
     }
 }
